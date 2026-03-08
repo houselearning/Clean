@@ -1,0 +1,28 @@
+name: Create Clean Draft PR
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  create-clean-pr:
+    if: contains(github.event.issue.body, '--HouseLearningCleanPlease')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Generate Clean PR
+        run: node scripts/generate_clean_pr.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
