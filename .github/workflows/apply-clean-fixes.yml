@@ -1,0 +1,30 @@
+name: Apply Clean Fixes
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  apply-fixes:
+    if: contains(github.event.issue.body, '--HouseLearningCleanPlease') &&
+        contains(github.event.issue.body, 'Fixes PR:')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Apply Fixes
+        run: node scripts/apply_fixes.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          REPO: ${{ github.repository }}
