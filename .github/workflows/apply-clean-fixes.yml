@@ -9,6 +9,9 @@ jobs:
     if: contains(github.event.issue.body, '--HouseLearningCleanPlease') &&
         contains(github.event.issue.body, 'Fixes PR:')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
 
     steps:
       - uses: actions/checkout@v4
