@@ -1,0 +1,77 @@
+name: "Clean — Automated Draft PR & Fix Engine"
+description: "Creates draft PRs, applies fixes from issues, and checks PRs for typos."
+author: "HouseLearningCleaned[bot]"
+branding:
+  icon: "check-circle"
+  color: "blue"
+
+inputs:
+  mode:
+    description: "Which Clean operation to run: create-pr | apply-fixes | typo-check"
+    required: true
+  issue-body:
+    description: "Raw issue body text (for create-pr and apply-fixes)"
+    required: false
+  issue-number:
+    description: "Issue number (for create-pr)"
+    required: false
+  repo:
+    description: "owner/repo target"
+    required: true
+  token:
+    description: "GitHub App token or PAT with repo permissions"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      shell: bash
+      run: npm install
+
+    # -----------------------------
+    # MODE: CREATE DRAFT PR
+    # -----------------------------
+    - name: Run create-pr script
+      if: ${{ inputs.mode == 'create-pr' }}
+      shell: bash
+      run: |
+        node scripts/generate_clean_pr.js
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ISSUE_BODY: ${{ inputs.issue-body }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        REPO: ${{ inputs.repo }}
+
+    # -----------------------------
+    # MODE: APPLY FIXES
+    # -----------------------------
+    - name: Run apply-fixes script
+      if: ${{ inputs.mode == 'apply-fixes' }}
+      shell: bash
+      run: |
+        node scripts/apply_fixes.js
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ISSUE_BODY: ${{ inputs.issue-body }}
+        REPO: ${{ inputs.repo }}
+
+    # -----------------------------
+    # MODE: TYPO CHECK
+    # -----------------------------
+    - name: Run typo checker
+      if: ${{ inputs.mode == 'typo-check' }}
+      shell: bash
+      run: |
+        node scripts/typo_check.js
