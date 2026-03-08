@@ -8,6 +8,8 @@ jobs:
   create-clean-pr:
     if: contains(github.event.issue.body, '--HouseLearningCleanPlease')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
